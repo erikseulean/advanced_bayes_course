@@ -1,8 +1,9 @@
-\documentclass{article}
+\documentclass[12pt,a4paper]{article}
 
 \usepackage{graphicx}
 \usepackage{float}
 \graphicspath{ {./images/} }
+\renewcommand{\baselinestretch}{1.5} 
 
 \author{Erik-Cristian seulean}
 \title{Nonparametric bayesian inference - a guide to clustering algorithms}
@@ -134,5 +135,32 @@ The choice of parameters $a$ and $b$ for the Beta distribution are researched by
 When $a_{k}=1$ and $b_{k}=\alpha$, $\alpha > 0$ the process is called \textit{Dirichlet process stick-breaking}. The distribution over all $\rho = (\rho_{1}, \rho_{2}, ...)$ is called Griffin-Engen-McCloskey (GEM). 
 
 $$ (\rho_{1}, \rho_{2}, ...) \sim GEM(\alpha)$$
+
+\section{Dirichlet process mixture model}
+
+The Gaussian mixture model specified above, for K fixed clusters can be transformed to work with an arbitrary number of custers by using the $GEM$ distribution instead of Dirichlet.
+
+$$(\rho_{1}, \rho_{2}, ...) \sim GEM(\alpha)$$
+$$\mu_{k} \sim \mathcal{N}(\mu_{0}, \sigma^2)$$
+$$ G = \sum_{k}^{\infty}\rho_{k}\delta_{\mu k} \sim DPM(\alpha, \mathcal{N}(\mu_{0}, \sigma^2))$$
+
+The above will put weight $\rho_{k}$ at $\delta_{\mu k}$ where $\delta_{\mu k}$ denotes the $k^{th}$ cluster. The first parameter is $\alpha$ parameter needed for the GEM distribution, the second one is the distribution used to draw $\delta_{\mu k}$, the locations of the clusters. In practice, sampling from this distribution would mean that with probability $\rho_{k}$ will draw an observation from cluster with center $\delta_{\mu k}$.
+
+The problem that arises with this model is that we cannot draw an infinite number of probabilities $\rho_{k}$, but we can do draw them on demand as we sample. The example above, where we draw points into the cluster, by sampling from a Uniform distribution and checked which cluster the points belongs to can give an indication of what we can do here. If we first draw a point $u \sim Uniform(0, 1)$ we can then sample enough $\rho_{k}$ values that would make the sum of all $\rho_{k}$ sampled be greater than $u$. The complete step by step sampling algorithm is given by the following:
+
+\begin{enumerate}
+    \item Draw an observation $u$ from a $Uniform(0, 1)$ distribution.  
+    \item Generate $P_{k} \sim Beta(1, \alpha)$ and find $\rho_{k}$ using the \textit{stick breaking algorithm}. Repeat until $\sum_{k}\rho_{k} > u$. 
+    \item For every $\rho_{k}$ sampled, sample the centre for the cluster associated with $\rho_{k}$ from $\mathcal{N}(\mu_{0}, \sigma_{0}^2)$ 
+    \item Find the cluster the point belongs to such that $\rho_{k-1} < u < \rho_{k}$.
+    \item Sample an observation from $\mathcal{N}(\mu_{k}, \sigma^2)$ where $\mu_{k}$ is the centre of the cluster that was selected.
+    \item Repeat until all $n$ points are sampled.
+\end{enumerate}
+
+The algorithm above can be observed step by step using \textit{rDPMM\_visual} in the package provided, while \textit{rDPMM} returns a sample.
+
+The \textit{Dirichlet process} as presented above, is a distribution of distributions over a sample space. If we consider $A_{1}, A_{2}, ..., A_{n}$ a partition of the sample space $\Omega$, we can say that the $Dirichlet\ process$ assigns a particular mass, to each of this partitions of the sample space. The total mass distributed to each partition is distributed following a \textit{Dirichlet\ distribution}. 
+
+$$(P(A_{1}), P(A_{2}), ... , P(A_{k})) ~ Dir(\alpha G(A_{1}), \alpha G(A_{2}), ..., \alpha G(A_{k}))$$
 
 \end{document}\models

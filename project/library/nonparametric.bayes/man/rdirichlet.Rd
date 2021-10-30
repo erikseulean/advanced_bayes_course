@@ -2,7 +2,7 @@
 % Please edit documentation in R/generate_dirichlet.r
 \name{rdirichlet}
 \alias{rdirichlet}
-\title{Add together two numbers}
+\title{Generate a sample from a Dirichlet distirbution}
 \usage{
 rdirichlet(n, alpha)
 }
@@ -15,7 +15,7 @@ rdirichlet(n, alpha)
 A sample of n observations from the Dirichlet distribution.
 }
 \description{
-Add together two numbers
+Generate a sample from a Dirichlet distirbution
 }
 \examples{
 rdirichlet(n=1, alpha=c(2, 2, 2))

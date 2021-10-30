@@ -2,10 +2,13 @@
 
 \usepackage{graphicx}
 \usepackage{float}
+\usepackage{amsmath}
+\usepackage[noend]{algpseudocode}
 \graphicspath{ {./images/} }
-\renewcommand{\baselinestretch}{1.5} 
+\renewcommand{\baselinestretch}{1.5}
+\everymath{\displaystyle}
 
-\author{Erik-Cristian seulean}
+\author{Erik-Cristian Seulean}
 \title{Nonparametric bayesian inference - a guide to clustering algorithms}
 \date{\today}
 
@@ -23,7 +26,7 @@ organised ways. The library, here in St. Andrews contains over 1 million books, 
 today on a topic such as Bayesian inference is a matter of minutes. As the University increases the
 diversity of degrees that students can take, the number of book categories increase over time and 
 this leads to the following question \textit{How do we generate a mathematical model that is capable
-to group future books given the collection of books currently available ?}
+to group books that are alike into well defined categories ?}
 
 \section{Nonparametric Bayes a brief description}
 There are two separate classes of Bayesian inference. One class contains inference on
@@ -144,9 +147,9 @@ $$(\rho_{1}, \rho_{2}, ...) \sim GEM(\alpha)$$
 $$\mu_{k} \sim \mathcal{N}(\mu_{0}, \sigma^2)$$
 $$ G = \sum_{k}^{\infty}\rho_{k}\delta_{\mu k} \sim DPM(\alpha, \mathcal{N}(\mu_{0}, \sigma^2))$$
 
-The above will put weight $\rho_{k}$ at $\delta_{\mu k}$ where $\delta_{\mu k}$ denotes the $k^{th}$ cluster. The first parameter is $\alpha$ parameter needed for the GEM distribution, the second one is the distribution used to draw $\delta_{\mu k}$, the locations of the clusters. In practice, sampling from this distribution would mean that with probability $\rho_{k}$ will draw an observation from cluster with center $\delta_{\mu k}$.
+The above will put weight $\rho_{k}$ at $\delta_{\mu k}$ where $\delta_{\mu k}$ denotes the $k^{th}$ cluster. The first parameter is $\alpha$, parameter needed for the GEM distribution, the second one is the distribution used to draw $\delta_{\mu k}$, the locations of the clusters. In practice, sampling from this distribution would mean that with probability $\rho_{k}$ will draw an observation from cluster with center $\delta_{\mu k}$.
 
-The problem that arises with this model is that we cannot draw an infinite number of probabilities $\rho_{k}$, but we can do draw them on demand as we sample. The example above, where we draw points into the cluster, by sampling from a Uniform distribution and checked which cluster the points belongs to can give an indication of what we can do here. If we first draw a point $u \sim Uniform(0, 1)$ we can then sample enough $\rho_{k}$ values that would make the sum of all $\rho_{k}$ sampled be greater than $u$. The complete step by step sampling algorithm is given by the following:
+The problem that arises with this model is that we cannot draw an infinite number of probabilities $\rho_{k}$, but we can do draw them on demand, as we sample. The example above, where we draw points into the cluster, by sampling from a Uniform distribution and check which clusters the points belong to can give an indication of what we can do here. If we first draw a point $u \sim Uniform(0, 1)$ we can then sample enough $\rho_{k}$ values that would make the sum of all $\rho_{k}$ sampled be greater than $u$. The complete step by step sampling algorithm is given by the following:
 
 \begin{enumerate}
     \item Draw an observation $u$ from a $Uniform(0, 1)$ distribution.  
@@ -161,6 +164,61 @@ The algorithm above can be observed step by step using \textit{rDPMM\_visual} in
 
 The \textit{Dirichlet process} as presented above, is a distribution of distributions over a sample space. If we consider $A_{1}, A_{2}, ..., A_{n}$ a partition of the sample space $\Omega$, we can say that the $Dirichlet\ process$ assigns a particular mass, to each of this partitions of the sample space. The total mass distributed to each partition is distributed following a \textit{Dirichlet\ distribution}. 
 
-$$(P(A_{1}), P(A_{2}), ... , P(A_{k})) ~ Dir(\alpha G(A_{1}), \alpha G(A_{2}), ..., \alpha G(A_{k}))$$
+$$(P(A_{1}), P(A_{2}), ... , P(A_{k})) \sim Dir(\alpha G(A_{1}), \alpha G(A_{2}), ..., \alpha G(A_{k}))$$
+Given that there is a connection between the \textit{Dirichlet process} and the \textit{Dirichlet distribution}, we can derive the posterior distribution when we have Dirichlet-Categorical or Dirichlet-Multinomial prior and likelihood pairs:
+
+$$\rho_{1}, ... ,\rho_{k} \sim Dir(\alpha_{1}, ..., \alpha_{k})$$
+$$x_{1}, ... ,x_{k} \sim Categorical(\rho_{1}, ... \rho_{k})$$
+
+$$\displaystyle \pi(\rho|x) \propto f(x|\rho)\pi(\rho) \propto \prod_{i}^{k} f(x_{i}| \rho)\pi(\rho) $$
+$$\propto \prod_{i}^k \prod_{j}^k \rho_{j}^{I(x_{i} = j)}\prod_{i}^k \rho_{i}^{\alpha_{i} - 1} \propto \prod_{j}^k \rho_{j}^{\sum_{i}I(x_{i} = j)}\prod_{i}^k \rho_{j}^{\alpha_{j} - 1}$$
+$$ \propto \prod_{j}^k \rho_j^{{c_{j}} + \alpha{j} - 1}$$
+$c_{j} = \sum_i I(x_{i} == j) $
+
+Similarly, if the observations are from a \textit{Multinomial distribution}:
+$$x_{1}, ... ,x_{k} \sim Multinomial(\rho_{1}, ... \rho_{k})$$
+$$\displaystyle \pi(\rho|x) \propto f(x|\rho)\pi(\rho) \propto \prod_{i}^{k} f(x_{i}| \rho)\pi(\rho) $$
+$$ \propto \prod_{i}^{k} \rho_{i}^{c_{i}} \prod_{i}^{k} \rho_{i}^{\alpha - 1} \propto \prod_{i}^{k} \rho_{i}^{c_{i} + \alpha_{i} - 1}$$ 
+
+In both cases, we can notice that the posterior is following a \textit{Dirichlet distribution} so the Dirichlet distribution is the Conjugate prior for both the Categorical and the Multinomial distributions. The posterior distribution in these cases is $\pi(\rho|x) \sim Dir(\alpha_{1} + c_{1}, ..., \alpha_{k} + c_{k})$. In terms of the clusters (or partition of the sample space), if we observe a new observation in cluster $i$, the posterior then is updated with a new observation in cluster $i$:
+$$(P(A_{1}), P(A_{2}), ... , P(A_{k})) \sim Dir(\alpha G(A_{1}), \alpha G(A_{2}), ..., G(A_{i}) + 1, ..., \alpha G(A_{k}))$$ which in fact leads to $ G|x_{1} \sim DP(\alpha + 1, \frac{\alpha \mathcal{N} + \delta_{x}}{\alpha + 1})$.
+
+\section{Pólya Urn}
+
+In the section above, drawing observations from the \textit{Dirichlet process} required to sample values for $\rho_{k}$ from the \textit{GEM distribution}. If we could find a way to avoid this step, we could remove the $\rho_{k}$ variables altogether and the model would be simpler. It turns out that there is a way of doing this by integrating out $\rho_{k}$. As before, we could start from the same setup as in the Gaussian mixture model:
+
+$$\rho_{1} \sim Beta(a, b)$$
+$$Z_{n} \sim Categorical(\rho_{1}, \rho_{2})$$
+
+\begin{align*}
+\begin{array}{l@{{}={}}l}
+    P(Z_{n} = 1|Z_{1}, Z_{2}, ..., Z_{n-1})
+    & \int P(Z_{n} = 1, \rho_{1}|Z_{1}, Z_{2}, ..., Z_{n-1}) \,d\rho_{1} \\
+    & \int P(Z_{n} = 1|\rho_{1})P(\rho_{1}|Z_{1}, Z_{2}, ..., Z_{n-1}) d\rho_{1} \\
+    & \int \rho_{1} Beta(a + c_{1}, b + c_{2})d\rho_{1} \\
+    & \int \rho_{1} \frac{\Gamma(a + c_{1} + b + c_{2})}{\Gamma(a+c_{1})\Gamma(b+c_{2})}\rho_{1}^{a+c_{1}}(1-\rho_{1})^{b+c_{2}} d\rho_{1} \\
+    & \frac{\Gamma(a + c_{1} + b + c_{2})}{\Gamma(a+c_{1})\Gamma(b+c_{2})} \frac{\Gamma(a+c_{1}+1)\Gamma(b+c_{2})}{\Gamma(a + c_{1} + b + c_{2}+1)} \\
+    & \frac{a + c_{1}}{a + c_{1} + b + c_{2}}
+\end{array}
+\end{align*}
+
+where $c_{j} = \sum_{i}^{n-1}I(Z_{i} = j)$
+
+In this case we are independent on $\rho_{k}$ and we can put an observation $Z_{k}$ into the cluster one with probability derived above. Intuitively, this can be interpreted in the following way. If we start with an urn, containing initially \textit{a} number of red balls and \textit{b} blue balls and draw from a \textit{Bernoulli distribution} with probability derived above, we can keep adding red or blue balls to the urn, based on the value sampled. As the number of balls in the urn goes to infinity, the proportion of red balls in the urn is $\rho_{1}$. An alternative intuition is that using the initial setup, we can draw a ball from the urn inspect the color and return to the urn two balls of that same color. As the number of balls grows to infinity the proportion of red balls goes to $\rho_{1}$. Not just the proportion of red to blue balls is $\rho_{1}$ as the number of balls goes to infinity, the distribution of the proportion of red balls is also \textit{Beta(a, b)}. The distribution of red balls in the urn is noted as being \textit{PólyaUrn(a, b)}.
+
+The Pólya urn for two types of balls can be generalised to K different colors, but instead of using Beta we can use $\rho_{1}, ..., \rho_{k} \sim Dirichlet(\alpha_{1}, ..., \alpha_{k})$. The probability of $n^{th}$ observation to go into cluster k given the previous \textit{n-1} observations is the same:
+$P(Z_{n} = k|Z_{1}, ..., Z_{n-1}) = \frac{\alpha_{k} + c_{k}}{\sum_i^n (\alpha_{i} + c_{i})}$ . If we keep adding balls to the urn, in the same procedure as above, the proportion of balls in the urn will follow th \textit{Dirichlet distribution} that we started with. 
+
+As before, we built the model up starting with a \textit{Beta distribution} for two clusters, then we generalised to K clusters using a \textit{Dirichlet distribution}. The next logical step is to set $K=\infty$. To be able to handle an arbitrary number of clusters, we will use a different type of urn called \textit{Hoppe urn} or \textit{Blackwell-MacQueen urn}. The urn will initially contain only one magic ball. When the magic ball is extracted from the urn, we put it back together with a ball of a new color, that does not exist in the urn. If we extract a ball of a particular color, we will return it to the urn together with another ball of the same color. The distribution of balls of any color is \textit{PólyaUrn(1, $\alpha$)}. The proportion of balls of the first color is also $Beta(1, \alpha)$, and this takes us back to the \textit{Stick breaking process.} If we consider $\rho_{k}$ the proportion of balls of the $k^{th}$ color we have the following: 
+
+$$ V_{k} \sim Beta(1, \alpha) $$
+$$\rho_{1} = V_{1}$$
+$$\rho_{2} = (1 - V_{1})V_{2}$$
+$$\rho_{k} = \prod_{i=1}^{k-1}(1-V_{i})V_{k}$$
+
+The urn is identical to the Dirichlet process but we don't have to deal with the \textit{GEM distribution} anymore as the $\rho_{k}$ were integrated out.
+
+\section{The chinese restaurant process}
+The \textit{chinese restaurant process} works in the same way as the \textit{Pólya urn}. A customer walks into a restaurant and either sits down at a new table or sits at a table that is already occupied, proportional to the number of people that already sit there. This process is identical to the Pólya urn, we can either draw the magic ball (sit at a new table) or draw a different colored ball (sit at an already occupied table). Each table in this case will have a color, and as in the previous example we have infinitely many tables. A librarian working at the library in St. Andrews, can either assign a new book to an existing category or create a new category for that book.
 
 \end{document}\models

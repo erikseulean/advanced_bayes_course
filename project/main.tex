@@ -235,5 +235,45 @@ $$P(\prod\nolimits_{N}|\prod\nolimits_{N, -n})= \left \{
 \right. $$ Where $\#C$ denotes the number of datapoints in that cluster until this point.
 
 \section{Gibbs sampling for the Chinese restaurant process}
+Gibbs sampling for the Chinese restaurant process allows us to perform inference about our data. For the given datapoints, we can run the sampler and try to recover the clusters in the data. We will consider that the cluster means are drawn from a \textit{Normal distribution} with known mean and variance $\mu_{0}$ and $\Sigma_{0}$. In practice, this model might be simplistic, and we would probably set a prior on $\mu_{0}$ and $\Sigma_{0}$ as well that would perform better on real datasets. Again, for simplicity purposes, we consider that the datapoints $X_{1}, X_{2}, ..., X_{n}$ are drawn from a \textit{Normal distribution} with known $\Sigma$ and unknown mean. This can be sumarised as follows: 
+
+$$ \mu_{c} \sim \mathcal{N}(\mu_{0}, \Sigma_{0})$$
+$$ X_{k}|\mu_{c} \sim \mathcal{N}(\mu_{c}, \Sigma) $$
+
+This setup allows us to take advantage of the fact that the Normal distribution is the conjugate prior for the Normal distribution. In other words, the posterior distribution will be a \textit{Normal distribution} as well, with parameters updated based on the likelihood and prior.
+
+The posterior distribution in this case is $P(\prod\nolimits_{N}|X_{1}, X_{2}, ..., X_{n})$. This posterior gives us the assignment of datapoints to clusters, given the existing datapoints. To be able to compute this posterior we will consider that we have the cluster assignments for $n-1$ datapoints, and we are only interested in assigning the current datapoint to a cluster. 
+
+$$P(\prod\nolimits_{N}|\prod\nolimits_{N, -n}, X_{1}, X_{2}, ..., X_{n})$$
+
+The $n^{th}$ datapoint has two possible options, either join an existing cluster or start a new cluster itself. In that case we can write the probability as follows: 
+
+$$P(\prod\nolimits_{N}|\prod\nolimits_{N, -n}, X_{1}, ..., X_{n}) = \left \{
+    \begin{array}{ll}
+		\frac{\#C}{\alpha+ N - 2}P(C \cup \{X_{n}\}|C) & \mbox{if joins a cluster} \\
+		\frac{\alpha}{\alpha+N-2}P(\{X_{n}\}) & \mbox{if starts a new cluster} 
+	\end{array}
+\right.$$
+where $\#C = \sum_{i}^{n}\mathcal{I}(X_{i} \in C)$
+
+$P(C \cup \{X_{n}\}|C)$ is the posterior distribution derived from the likelihood and the prior by completing the circle:
+$$P(C \cup \{X_{n}\}|C) \sim N(\mu, \Sigma_{x} + \Sigma_{0})$$
+$$\Sigma_{x}^{-1} = \Sigma_{0}^{-1} + (\#C)\Sigma^{-1}$$
+$$\mu = \Sigma(\Sigma_{x}^{-1}\sum_{k \in C}X_{k} + \Sigma_{0}^{-1}\mu_{0})$$
+where $\Sigma^{-1}$ is the precision.
+
+We can see that as the number of datapoints in the cluster grows, $\Sigma_{0}^{-1} + (\#C)\Sigma^{-1}$ will grow so $\Sigma_{x}$ will go to 0. Similarly, $\mu$ will go towards the empirical mean of the cluster.
+
+The implementation of the Gibbs algorithm can be found in the \textit{cluster\_datapoints} function provided with the library and is as follows:
+
+\begin{enumerate}
+    \item Initialise all the datapoints in one single cluster.
+    \item Iterate from 1 to \textit{maxIterations} where \textit{maxIterations} denotes how many iterations the Gibbs sampling should perform. 
+    \item Iterate through all the datapoints one by one. For every datapoint remove it from the cluster is currently assigned.
+    \item Calculate the log probabilities for the point belonging to the currently existing clusters and the log probability of starting a new cluster.
+    \item Normalise and transform the probabilities.
+    \item Sample from a Categorical distribution with parameters
+\end{enumerate}
+
 
 \end{document}\models

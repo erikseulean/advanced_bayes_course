@@ -272,8 +272,11 @@ The implementation of the Gibbs algorithm can be found in the \textit{cluster\_d
     \item Iterate through all the datapoints one by one. For every datapoint remove it from the cluster is currently assigned.
     \item Calculate the log probabilities for the point belonging to the currently existing clusters and the log probability of starting a new cluster.
     \item Normalise and transform the probabilities.
-    \item Sample from a Categorical distribution with parameters
+    \item Sample the cluster from a Categorical distribution with parameters set to the probabilities derived above.
+    \item Assign the point to that cluster and continue to the next point.
+    \item When all the existing points are checked a new iteration of the Gibbs sampler is executed. 
 \end{enumerate}
 
+As mentioned earlier the implementation is simplistic, considering only one prior for the mean, with variance considered known. I considered a few 
 
 \end{document}\models

@@ -70,17 +70,7 @@ to the number of parameters in a nonparametric Bayesian model where the number o
 with the data. 
 
 \section{The clustering problem}
-Assuming we have observations $X_{1}, X_{2}, ..., X_{n}$ we want to assign every datapoint to a single cluster.
-
-\begin{figure} [H]
-    \begin{center}
-        \includegraphics[scale=0.3, width=5cm]{clusters.png}
-        \caption{Clustered datapoints}
-        \label{fig:boat1}
-    \end{center}
-\end{figure}
-
-In a general Gaussian mixture model, with the number of clusters $K$ set to 2, we could potentially have the following setup: 
+Assuming we have observations $X_{1}, X_{2}, ..., X_{n}$ we want to assign every datapoint to a single cluster. In a general Gaussian mixture model, with the number of clusters $K$ set to 2, we could potentially have the following setup: 
 
 $$\mu_{k} \sim \mathcal{N}(\mu_{0}, \sigma_{0}^2)$$ 
 $$\rho_{1} \sim Beta(a, b)$$
@@ -105,18 +95,18 @@ So far the examples above, all work on the case where the number of clusters is 
 
 \begin{figure} [H]
     \begin{center}
-        \includegraphics[scale=1, width=5cm]{stacked_dirichlet.png}
+        \includegraphics[scale=1, width=13cm]{stacked_dirichlet.png}
         \caption{Clusters generated from a Dirichlet distribution.}
         \label{fig:stacked_dirichlet}
     \end{center}
 \end{figure}
 
-At this point, we only considered the available clusters, but we have not sampled our datapoints $X_{1}, X_{2}, ..., X_{n}$ into the corresponding clusters. To put a particular datapoint into a certain cluster, we can draw an observation from a Uniform distribution and check which cluster it belongs to. We can repeat the same until all n datapoints are assigned to a cluster. The cluster generation function in the library allows to visually get an intuition of how this happens sequentially. 
+At this point, we only considered the available clusters, but we have not sampled our datapoints $X_{1}, X_{2}, ..., X_{n}$ into the corresponding clusters. To put a particular datapoint into a certain cluster, we can draw an observation from a Uniform distribution and check which cluster it belongs to. We will sum up every cluster delimitation until the total sum is higher than the value sampled from the \textit{Uniform distribution}. When we exceeded the sum, the latest $\rho_{k}$ will denote the $k^{th}$ cluster where the datapoint belongs to. We can repeat the same until all n datapoints are assigned to a cluster. The cluster generation function in the library allows to visually get an intuition of how this happens sequentially. 
 
 \begin{figure} [H]
     \begin{center}
-        \includegraphics[scale=1, width=5cm]{clustered_points.png}
-        \caption{Clustered points}
+        \includegraphics[scale=1, width=13cm]{clustered_points.png}
+        \caption{4 points associated with the clusters generated}
         \label{fig:clustered_points}
     \end{center}
 \end{figure}
@@ -206,7 +196,7 @@ where $c_{j} = \sum_{i}^{n-1}I(Z_{i} = j)$
 In this case we are independent on $\rho_{k}$, and we can put an observation $Z_{k}$ into the cluster one with probability derived above. Intuitively, this can be interpreted in the following way. If we start with an urn, containing initially \textit{a} number of red balls and \textit{b} blue balls and draw from a \textit{Bernoulli distribution} with probability derived above, we can keep adding red or blue balls to the urn, based on the value sampled. As the number of balls in the urn goes to infinity, the proportion of red balls in the urn is $\rho_{1}$. An alternative intuition is that using the initial setup, we can draw a ball from the urn inspect the color and return to the urn two balls of that same color. As the number of balls grows to infinity the proportion of red balls goes to $\rho_{1}$. Not just the proportion of red to blue balls is $\rho_{1}$ as the number of balls goes to infinity, the distribution of the proportion of red balls is also \textit{Beta(a, b)}. The distribution of red balls in the urn is noted as being \textit{PólyaUrn(a, b)}.
 
 The Pólya urn for two types of balls can be generalized to K different colors, but instead of using Beta we can use $\rho_{1}, ..., \rho_{k} \sim Dirichlet(\alpha_{1}, ..., \alpha_{k})$. The probability of $n^{th}$ observation to go into cluster k given the previous \textit{n-1} observations is the same:
-$P(Z_{n} = k|Z_{1}, ..., Z_{n-1}) = \frac{\alpha_{k} + c_{k}}{\sum_i^n (\alpha_{i} + c_{i})}$ . If we keep adding balls to the urn, in the same procedure as above, the proportion of balls in the urn will follow the \textit{Dirichlet distribution} that we started with. 
+$P(Z_{n} = k|Z_{1}, ..., Z_{n-1}) = \frac{\alpha_{k} + c_{k}}{\sum_i^n (\alpha_{i} + c_{i})}$. If we keep adding balls to the urn, in the same procedure as above, the proportion of balls in the urn will follow the \textit{Dirichlet distribution} that we started with. 
 
 As before, we built the model up starting with a \textit{Beta distribution} for two clusters, then we generalized to K clusters using a \textit{Dirichlet distribution}. The next logical step is to set $K=\infty$. To be able to handle an arbitrary number of clusters, we will use a different type of urn called \textit{Hoppe urn} or \textit{Blackwell-MacQueen urn}. The urn will initially contain only one magic ball. When the magic ball is extracted from the urn, we put it back together with a ball of a new color, that does not exist in the urn. If we extract a ball of a particular color, we will return it to the urn together with another ball of the same color. The distribution of balls of any color is \textit{PólyaUrn(1, $\alpha$)}. The proportion of balls of the first color is also $Beta(1, \alpha)$, and this takes us back to the \textit{Stick breaking process.} If we consider $\rho_{k}$ the proportion of balls of the $k^{th}$ color we have the following: 
 
@@ -224,7 +214,7 @@ It comes naturally to ask what is the difference between the \textit{Dirichlet p
 
 Given that we are only considering the cluster arrangements and not the proportions for each cluster, we are interested in modelling the partitions of the datapoints. For example, one partition of 10 datapoints can be the following $\{\{1, 5, 7\}, \{2,3,4,6\}, \{8, 9\}\}$. That denotes that the first datapoint, the $5^{th}$ and the $7^{th}$ are assigned in cluster one, and so forth. The order of the clusters doesn't matter, as the clusters are interchangeable, the datapoints will be associated with the same cluster regardless. It comes naturally to ask what is the probability of a cluster arrangement. The probability for the cluster arangement above is the following: $$\frac{\alpha}{\alpha}\frac{\alpha}{\alpha+1}\frac{1}{\alpha+2}\frac{2}{\alpha+3}\frac{1}{\alpha+5}\frac{3}{\alpha+6}\frac{2}{\alpha+7}\frac{\alpha}{\alpha+8}\frac{1}{\alpha+9}$$
 
-From here we can easily generalise to N datapoints. Considering K clusters and $n_{k}$ datapoints in cluster k we have the following: $$\frac{\alpha^{K} \prod_{k}(n_{k}-1)!}{\alpha(\alpha+1)...(\alpha+N-1)} = P(\prod\nolimits_{N} = \pi_{N})$$
+From here we can easily generalize to N datapoints. Considering K clusters and $n_{k}$ datapoints in cluster k we have the following: $$\frac{\alpha^{K} \prod_{k}(n_{k}-1)!}{\alpha(\alpha+1)...(\alpha+N-1)} = P(\prod\nolimits_{N} = \pi_{N})$$
 
 We notice here that the order in which datapoints are assigned to clusters doesn't change the probability of a particular arrangement. If we observe the partition of the 10 datapoints as above, the probability for the partition is the same if we permute the datapoints and consider them in a different order, as long as the datapoints are assigned to the same clusters as initially. This gives a property called exchangeability that comes handly in Gibbs sampling, which will be discussed in the later pages. This allows us to consider any datapoint, as being always the last one: 
 $$P(\prod\nolimits_{N}|\prod\nolimits_{N, -n})= \left \{
@@ -277,6 +267,66 @@ The implementation of the Gibbs algorithm can be found in the \textit{cluster\_d
     \item When all the existing points are checked a new iteration of the Gibbs sampler is executed. 
 \end{enumerate}
 
-As mentioned earlier the implementation is simplistic, considering only one prior for the mean, with variance considered known. I considered a few 
+As mentioned earlier the implementation is simplistic, considering only one prior for the mean, with variance considered known. Alternatives to this algorithm include hierarchical models where we can set priors on both variance and mean and increase the performance of the clustering algorithm. An alternative to initialise every point belonging to a cluster is to randomly assign each datapoint to a random cluster and start the sampler with this configuration. We would expect that the sampler would adjust the number of cluster over multiple iterations and converge to the number of clusters presented by the data.
+
+\section{Results}
+In order to assess the performance of the clustering algorithm I tried the library on different datasets and I considered two options to assess how well it performs. First alternative was to consider the average number of iterations a datapoint spent in a particular cluster. This ended up being problematic because over a high number of iterations, the datapoints might switch clusters. Intuitively, consider that after $n$ iterations, all points are correctly assigned to two clusters $A$ and $B$. If I run the sampler for a high number of iterations, the points associated with cluster $A$ might switch to cluster $B$ and vice-versa. An alternative solution was to stop the clustering algorithm after a number of iterations and inspect the latest cluster association. This solution (at least on the datasets that I considered) seems to be giving relatively good results (at least visually) but in practice, the first solution might be more accurate if the cluster switching can be avoided.
+
+First dataset that I tried the clustering algorithm on was a dataset that I generated. I tried to keep the cluster centers non-overlapping and relatively separated to have an initial assessment if it works to a certain degree. This dataset is available in the library as $split\_data$.
+
+\begin{figure} [H]
+    \centering
+    \begin{minipage}{.5\textwidth}
+      \centering
+      \includegraphics[width=0.8\linewidth]{initial_split_data.png}
+      \caption{Before clustering}
+      \label{fig:before clustering}
+    \end{minipage}%
+    \begin{minipage}{.5\textwidth}
+      \centering
+      \includegraphics[width=0.8\linewidth]{split_data_clustered}
+      \caption{After 1000 iterations}
+      \label{fig:split points after clustering}
+    \end{minipage}
+\end{figure}
+    
+Surprisingly (or not) this worked perfectly. The cluster separation is correct and as expected. At this point, I started getting excited, so I decided to test the clustering algorithm on some datasets that I did not generate. My first thought was to try the clustering algorithm on the iris dataset. This dataset was introduced by Ronald Fisher and contains 150 samples from 3 Iris species and is available in R - $data(iris)$. Admitedly, while there are 3 different Iris species in the dataset, I was expecting to see two clusters as 2 of the different Iris species are very similar in variables and I wouldn't expect to be able to distinguish between the 3 species without a hierarchical model.
+
+\begin{figure} [H]
+    \centering
+    \textbf{Iris Petal Width vs Length}\par\medskip
+    \begin{minipage}{.5\textwidth}
+      \centering
+      \includegraphics[width=0.8\linewidth]{petal_before.png}
+      \caption{Before clustering}
+      \label{fig:petal before clustering}
+    \end{minipage}%
+    \begin{minipage}{.5\textwidth}
+      \centering
+      \includegraphics[width=0.8\linewidth]{petal_after.png}
+      \caption{After 1000 iterations}
+      \label{fig:petal after clustering}
+    \end{minipage}
+\end{figure}
+
+\begin{figure} [H]
+    \centering
+    \textbf{Iris Sepal Width vs Petal Width}\par\medskip
+    \begin{minipage}{.5\textwidth}
+      \centering
+      \includegraphics[width=0.8\linewidth]{width_before.png}
+      \caption{Before clustering}
+      \label{fig:width before clustering}
+    \end{minipage}%
+    \begin{minipage}{.5\textwidth}
+      \centering
+      \includegraphics[width=0.8\linewidth]{width_after.png}
+      \caption{After 1000 iterations}
+      \label{fig:width after clustering}
+    \end{minipage}
+\end{figure}
+
+The cluster correctly finds the number of clusters, however the separation of points into clusters is not perfect. I tried running the chain for a longer time but the points on the edge of the clusters sometimes get associated with the wrong cluster. Nevertheless, the algorithm got over $90\%$ accuracy, calculated by considering how many of the 150 points were correctly associated with the correct cluster.
+It's worth mentioning that these results are experimental and convergence was not checked using metrics that could tell if the stability distribution was reached.
 
 \end{document}\models

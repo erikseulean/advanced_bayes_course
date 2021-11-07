@@ -1,5 +1,5 @@
 
-# Generation of a Dirichlet distribution 
+# Generation of a Dirichlet distribution
 # Copyright (C) 2021, Erik-Cristian Seulean
 
 #    This program is free software: you can redistribute it and/or modify
@@ -18,26 +18,27 @@
 
 
 #' Generate a sample from a Dirichlet distirbution
-#' 
+#'
 #' @param n Number of observations.
-#' @param alpha A vector containing the parameters for the Dirichlet distribution.
+#' @param alpha A vector containing the parameters for
+#' the Dirichlet distribution.
 #' @return A sample of n observations from the Dirichlet distribution.
 #' @examples
 #' rdirichlet(n=1, alpha=c(2, 2, 2))
 #' @export
-rdirichlet = function(n, alpha) {
+rdirichlet <- function(n, alpha) {
 
     if (n < 0) {
-        return ()
+        return()
     }
-    
-    v = list()
 
-    for(i in 1:n) {
-        gammas = sapply(alpha, function(k) {
-            return(rgamma(n=1, shape=k))
+    v <- list()
+
+    for (i in 1:n) {
+        gammas <- sapply(alpha, function(k) {
+            return(rgamma(n = 1, shape = k))
         })
-        v[[i]] = gammas/(sum(gammas))
+        v[[i]] <- gammas / (sum(gammas))
     }
-    return (if (length(v) == 1) v[[1]] else v)
+    return(if (length(v) == 1) v[[1]] else v)
 }

@@ -4,6 +4,7 @@
 \usepackage{float}
 \usepackage{amsmath}
 \usepackage[noend]{algpseudocode}
+\usepackage{url}
 \graphicspath{ {./images/} }
 \renewcommand{\baselinestretch}{1.5}
 \everymath{\displaystyle}
@@ -123,7 +124,7 @@ A solution to the above limitation is to set K to be arbitrary large that would 
     \item Set $\rho_{K} = 1 - (\rho_{1} + \rho_{2} + ... + \rho_{K-1})$
 \end{itemize}
 
-The choice of parameters $a$ and $b$ for the Beta distribution are researched by Ishwaran and James, 2001, and we will simply use $1$ and $\alpha$ with $\alpha$ given for all $a_{k}$ and $b_{k}$. 
+The choice of parameters $a$ and $b$ for the Beta distribution are researched by Ishwaran and James, 2001 \cite{ishwaran2001}, and we will simply use $1$ and $\alpha$ with $\alpha$ given for all $a_{k}$ and $b_{k}$. 
 When $a_{k}=1$ and $b_{k}=\alpha$, $\alpha > 0$ the process is called \textit{Dirichlet process stick-breaking}. The distribution over all $\rho = (\rho_{1}, \rho_{2}, ...)$ is called Griffin-Engen-McCloskey (GEM). 
 
 $$ (\rho_{1}, \rho_{2}, ...) \sim GEM(\alpha)$$
@@ -208,7 +209,7 @@ $$\rho_{k} = \prod_{i=1}^{k-1}(1-V_{i})V_{k}$$
 The urn is identical to the Dirichlet process, but we don't have to deal with the \textit{GEM distribution} anymore as the $\rho_{k}$ were integrated out.
 
 \section{The chinese restaurant process}
-The \textit{chinese restaurant process} works in the same way as the \textit{Pólya urn}. A customer walks into a restaurant and either sits down at a new table or sits at a table that is already occupied, proportional to the number of people that already sit at the table. This process is identical to the Pólya urn, we can either draw the magic ball (sit at a new table) or draw a different colored ball (sit at an already occupied table). Each table in this case will have a color, and as in the previous example we have infinitely many tables. A librarian working at the library in St. Andrews, can either assign a new book to an existing category or create a new category for that book. 
+The \textit{chinese restaurant process} works in the same way as the \textit{Pólya urn}. A customer walks into a restaurant and either sits down at a new table or sits at a table that is already occupied, proportional to the number of people that already sit at the table. This process is identical to the Blackwell-MacQueen urn, we can either draw the magic ball (sit at a new table) or draw a different colored ball (sit at an already occupied table). Each table in this case will have a color, and as in the previous example we have infinitely many tables. A librarian working at the library in St. Andrews, can either assign a new book to an existing category or create a new category for that book. 
 
 It comes naturally to ask what is the difference between the \textit{Dirichlet process} and the \textit{Chinese Restaurant process}. While the \textit{Dirichlet process} describes both the cluster assignments and the proportion of the clusters the \textit{Chinese Restaurant process} describes only the cluster assignments. In many applications, knowing the cluster proportions is not of much use, so applications generally rely on implementations of the CRP algorithm for practical purposes. I was curious to find out where the name for the algorithm comes from, and I found out that the Chinese restaurants in San Francisco, in the nineties were trying to accommodate as many customers as possible. Customers were generally interested in the popular tables (with many other customers) but now and then, a customer would come in and sit at a new table. 
 
@@ -219,7 +220,7 @@ From here we can easily generalize to N datapoints. Considering K clusters and $
 We notice here that the order in which datapoints are assigned to clusters doesn't change the probability of a particular arrangement. If we observe the partition of the 10 datapoints as above, the probability for the partition is the same if we permute the datapoints and consider them in a different order, as long as the datapoints are assigned to the same clusters as initially. This gives a property called exchangeability that comes handly in Gibbs sampling, which will be discussed in the later pages. This allows us to consider any datapoint, as being always the last one: 
 $$P(\prod\nolimits_{N}|\prod\nolimits_{N, -n})= \left \{
     \begin{array}{ll}
-		\frac{\#C}{\alpha+ N - 2} & \mbox{if joins cluster k} \\
+		\frac{\#C}{\alpha+ N - 2} & \mbox{if joins an existing cluster} \\
 		\frac{\alpha}{\alpha+N-2} & \mbox{if starts a new cluster} 
 	\end{array}
 \right. $$ Where $\#C$ denotes the number of datapoints in that cluster until this point.
@@ -290,7 +291,7 @@ First dataset that I tried the clustering algorithm on was a dataset that I gene
     \end{minipage}
 \end{figure}
     
-Surprisingly (or not) this worked perfectly. The cluster separation is correct and as expected. At this point, I started getting excited, so I decided to test the clustering algorithm on some datasets that I did not generate. My first thought was to try the clustering algorithm on the iris dataset. This dataset was introduced by Ronald Fisher and contains 150 samples from 3 Iris species and is available in R - $data(iris)$. Admitedly, while there are 3 different Iris species in the dataset, I was expecting to see two clusters as 2 of the different Iris species are very similar in variables and I wouldn't expect to be able to distinguish between the 3 species without a hierarchical model.
+Surprisingly (or not) this worked perfectly. The cluster separation is correct and as expected. At this point, I started getting excited, so I decided to test the clustering algorithm on some datasets that I did not generate. My first thought was to try the clustering algorithm on the iris dataset. This dataset was introduced by Ronald Fisher and contains 150 samples from 3 Iris species and is available in R - $data(iris)$. Admittedly, while there are 3 different Iris species in the dataset, I was expecting to see two clusters as 2 of the different Iris species are very similar in variables and I wouldn't expect to be able to distinguish between the 3 species without a hierarchical model.
 
 \begin{figure} [H]
     \centering
@@ -328,5 +329,45 @@ Surprisingly (or not) this worked perfectly. The cluster separation is correct a
 
 The cluster correctly finds the number of clusters, however the separation of points into clusters is not perfect. I tried running the chain for a longer time but the points on the edge of the clusters sometimes get associated with the wrong cluster. Nevertheless, the algorithm got over $90\%$ accuracy, calculated by considering how many of the 150 points were correctly associated with the correct cluster.
 It's worth mentioning that these results are experimental and convergence was not checked using metrics that could tell if the stability distribution was reached.
+
+\section{Completing the circle - clustering Books}
+I started this paper by setting up a scene to cluster books, or large text documents, but the reality is that I haven't explained how the clustering algorithm, in the form of the CRP can be applied to cluster large text files. I'd like to propose a variation of the CRP algorithm that could potentially be applied to books. As In the Chinese restaurant process, let's consider the \textit{Spanish restaurant process} (given that in Spanish cuisine you usually order multiple tapas). \textit{At a Spanish restaurant a customer can order multiple dishes from a menu with unlimited possible tapas. When a customer walks into the restaurant, they can either sit down at a new table, or can sit at a table proportional to the number of tapas he likes at that table. Additionally, every occupied table has churos, on the house, which every customer likes.}
+
+$$P(\prod\nolimits_{N}|\prod\nolimits_{N, -n}, X_{1}, ..., X_{n}) = \left \{
+    \begin{array}{ll}
+		\frac{\sum w_{i}\mathcal{I}({i}\in B) + 1}{\alpha + \sum_j \sum_i w_{i,j}\mathcal{I}(i \in B) + C}P(C \cup \{X_{n}\}|C)\\
+		\frac{\alpha}{\alpha+\sum_i \sum_j w_{i,j}\mathcal{I}(i \in B) + C }P(\{X_{n}\}) 
+	\end{array}
+\right.$$
+where $w_{i}$ is the count of the number of tapas $i$ existing at the table and $\mathcal{I}({i}\in B)$ the customer likes that tapas. The one in the numerator stands for the \textit{churos}, and it's used to make sure that there is a non-zero probability to sit at that table even if the customer doesn't like any tapas at that table. 
+
+In terms of books, every book will have a list of words (after tokenization and removal of stopwords) and each word will have a count for the number of occurrences. A book can be represented by $B=(w_{0}, w_{1}, ..., w_{n})$ where $w_{i}$ is the occurrences of word \textit{i} in the book, and it will belong to a cluster, proportional to the sum of the counts of the words existing in the book that are already part of the cluster. Similar to CRP, for SRP the book will always be the last one, and we can be implemented using Gibbs sampling.
+
+\begin{thebibliography}{9}
+\bibitem{ishwaran2001}
+Herman Ishwaran, Lancelot F. James \emph{Gibbs sampling methods for stick-breaking process}, 2001
+
+\bibitem{broderick}
+Tamara Broderick \emph{Nonparametric Bayesian Statistics} \url{tamarabroderick.com/files/broderick_mlss_cadiz_part_i.pdf}
+
+\bibitem{gordon}
+Gordon J. Ross, Dean Markwick \emph{dirichletprocess: An R Package for Fitting Complex Bayesian Nonparametric Models}
+
+\bibitem{junyang}
+Junyang Chen, Zhiguo Gong, Weiwen Liu \emph{A Dirichlet process biterm-based mixture model for short text stream clustering}
+
+\bibitem{radford}
+Radford M. Neal \emph{Markov Chain Sampling Methods for Dirichlet Process Mixture Models}
+
+\bibitem{sivakumar}
+Sivakumar Murugiah \emph{Bayesian Nonparametric Clustering based on Dirichlet Processes}
+
+\bibitem{muller}
+Peter Müller, Ritten Mitra \emph{Bayesian Nonparametric Inference - Why and How}
+
+\bibitem{jordan}
+Michael Jordan, Tamara Broderick \emph{Nonparametric Bayesian Methods: Models, Algorithms, and Applications I} \url{https://simons.berkeley.edu/talks/tamara-broderick-michael-jordan-01-25-2017-1}
+
+\end{thebibliography}
 
 \end{document}\models

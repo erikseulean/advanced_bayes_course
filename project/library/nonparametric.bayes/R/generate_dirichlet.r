@@ -18,7 +18,8 @@
 
 
 #' Generate a sample from a Dirichlet distirbution
-#'
+#' Using:
+#'https://en.wikipedia.org/wiki/Dirichlet_distribution#Random_number_generation
 #' @param n Number of observations.
 #' @param alpha A vector containing the parameters for
 #' the Dirichlet distribution.

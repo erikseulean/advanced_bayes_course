@@ -3,3 +3,5 @@
 export(cluster_datapoints)
 export(rDPM_visual)
 export(rdirichlet)
+
+import(mvtnorm)

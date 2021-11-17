@@ -1,3 +1,21 @@
+#' Sequentially generate draws from a Dirichlet process mixture model,
+#' by showing step by step the iterations taken.
+#' The plot is centered at 0, with x and y from -5 to 5.
+#' The mixture draws the centres for clusters from a Normal distribution
+#' with mean mu and standard deviation sigma_0
+#' Additional to plotting the points, it also returns
+#' the points sampled.
+#'
+#' Hit enter to keep drawing until max n or type "x" to exit.
+#' @param n Number of observations.
+#' @param alpha Alpha corresponding to GEM(alpha) used to draw the rho vector.
+#' @param mu Mean of the Normal distribution used to draw the clusters.
+#' @param sigma_0 Standard deviation of the Normal distribution used
+#' to draw the points around the cluster centre.
+#' @return Returns the n observations sampled from the DPMM distribution.
+#' @examples
+#' rDPM(n=30, alpha=3, mu=0, sigma_0=1.5, sigma=0.7)
+#' @export
 rDPM <- function(n, alpha, mu, sigma_0, sigma) {
     rho <- c()
     rhosum <- 0

@@ -1,4 +1,5 @@
 library(mvtnorm)
+library(progress)
 #' Gibbs sampling for the Chinese Restaurant Process
 #' Implementation details can be found in the associated paper
 #' The algorithm stops at every 1000th iteration and prints
@@ -24,7 +25,7 @@ cluster_datapoints  <- function(
     sigma0=matrix(c(1, 0, 0, 1), nrow = 2, byrow = TRUE)
 ) {
 
-    # these are for color blind people,
+    # these are for color blind people (or at least I can see them),
     # plus a few others in case the number of clusters is high at any point
     colors <- c("#999999", "#E69F00", "#56B4E9", "#009E73",
         "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#1f001f",
@@ -57,9 +58,22 @@ cluster_datapoints  <- function(
     plot(data, col = cluster_assignments, pch = 19)
     print("Initial cluster configuration, press enter to continue")
     line <- readline()
+
+    # create a progress bar as it might be unintuitive
+    # that you have to wait
+    pb <- progress_bar$new(
+        format = "(:spin) [:bar] :percent [Elapsed time: :elapsedfull]",
+        total = 10000,
+        complete = "=",   # Completion bar character
+        incomplete = "-", # Incomplete bar character
+        current = ">",    # Current bar character
+        clear = FALSE,    # If TRUE, clears the bar when finish
+        width = 100)      # Width of the progress bar
+
     # start running the sampler.
-    # setting max iterations to 100000, but always can stop early
-    for (iter in 1:100000) {
+    # setting max iterations to 10000, but always can stop early
+    for (iter in 1:10000) {
+        pb$tick()
         if (iter %% 1000 == 0) {
             print(iter)
         }

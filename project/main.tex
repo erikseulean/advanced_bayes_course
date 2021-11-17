@@ -331,18 +331,9 @@ The cluster correctly finds the number of clusters, however the separation of po
 It's worth mentioning that these results are experimental and convergence was not checked using metrics that could tell if the stability distribution was reached.
 
 \section{Completing the circle - clustering Books}
-I started this paper by setting up a scene to cluster books, or large text documents, but the reality is that I haven't explained how the clustering algorithm, in the form of the CRP can be applied to cluster large text files. I'd like to propose a variation of the CRP algorithm that could potentially be applied to books. As In the Chinese restaurant process, let's consider the \textit{Spanish restaurant process} (given that in Spanish cuisine you usually order multiple tapas). \textit{At a Spanish restaurant a customer can order multiple dishes from a menu with unlimited possible tapas. When a customer walks into the restaurant, they can either sit down at a new table, or can sit at a table proportional to the number of tapas he likes at that table. Additionally, every occupied table has churos, on the house, which every customer likes.}
+I started this paper by setting up a scene to cluster books, or large text documents, but the reality is that I haven't explained how the clustering algorithm, in the form of the CRP can be applied to cluster large text files. Let's consider that every book in the collection can take a limited number of topics $K$. In order to cluster books, we would consider books that have the same topic as part of the same cluster. Each book is represented by a number of words $B=(w_{0}, w_{1}, ..., w_{n})$ (after tokenization and removal of stopwords). We can consider a multi-CRP, where multiple restaurants serve the same number of dishes (topics) and each table will contain only one dish. Every restaurant will be linked to only one book, and the words in a book are "sitting" at only one table (representing the topic they are associated with). For every word in the book, it can either sit at a table with a particular topic or can start a table with a new topic. After all the words are assigned to tables, we have a probability distribution on the topics for this particular book. The word frequencies would represent how many people are sitting at a particular table at a given point. If we apply the same for all the books, we could associate books together using the probability distributions over the topics. In order to be able to do this, we would require prior probabilities on the topic given a particular word and priors on the topics as well. This would build a hierarchical model that could cluster books of the same topics together.
 
-$$P(\prod\nolimits_{N}|\prod\nolimits_{N, -n}, X_{1}, ..., X_{n}) = \left \{
-    \begin{array}{ll}
-		\frac{\sum w_{i}\mathcal{I}({i}\in B) + 1}{\alpha + \sum_j \sum_i w_{i,j}\mathcal{I}(i \in B) + C}P(C \cup \{X_{n}\}|C)\\
-		\frac{\alpha}{\alpha+\sum_i \sum_j w_{i,j}\mathcal{I}(i \in B) + C }P(\{X_{n}\}) 
-	\end{array}
-\right.$$
-where $w_{i}$ is the count of the number of tapas $i$ existing at the table and $\mathcal{I}({i}\in B)$ the customer likes that tapas. The one in the numerator stands for the \textit{churos}, and it's used to make sure that there is a non-zero probability to sit at that table even if the customer doesn't like any tapas at that table. 
-
-In terms of books, every book will have a list of words (after tokenization and removal of stopwords) and each word will have a count for the number of occurrences. A book can be represented by $B=(w_{0}, w_{1}, ..., w_{n})$ where $w_{i}$ is the occurrences of word \textit{i} in the book, and it will belong to a cluster, proportional to the sum of the counts of the words existing in the book that are already part of the cluster. Similar to CRP, for SRP the book will always be the last one, and we can be implemented using Gibbs sampling.
-
+\newpage
 \begin{thebibliography}{9}
 \bibitem{ishwaran2001}
 Herman Ishwaran, Lancelot F. James \emph{Gibbs sampling methods for stick-breaking process}, 2001

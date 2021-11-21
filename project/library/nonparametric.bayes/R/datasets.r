@@ -1,4 +1,7 @@
-
+#' @importFrom grDevices dev.new dev.off palette
+#' @importFrom graphics barplot layout par points
+#' @importFrom stats rbeta rgamma rnorm runif
+NULL
 #' Generates a dataset used to exemplify clustering
 #' The cluster centers are set relatively far away to
 #' see how well the algorithm performs in simple scenarios

@@ -11,6 +11,7 @@
 #' @param mu Mean of the Normal distribution used to draw the clusters.
 #' @param sigma_0 Standard deviation of the Normal distribution used
 #' to draw the points around the cluster centre.
+#' @param sigma Standard deviation for the cluster centre.
 #' @return Returns the n observations sampled from the DPMM distribution.
 #' @examples
 #' rDPM_visual(n=30, alpha=3, mu=0, sigma_0=1.5, sigma=0.7)
@@ -24,7 +25,9 @@ rDPM_visual <- function(n, alpha, mu, sigma_0, sigma) {
     cluster_bars <- c()
     samples <- c()
 
-    par(mar = rep(2, 4))
+    par(mar = c(1, 1, 1, 1))
+    #par(mar = rep(2, 4))
+    
     layout(matrix(c(1, 2), nrow = 2, ncol = 1, byrow = TRUE), heights = c(1, 4))
 
     for (sample in 1: n) {

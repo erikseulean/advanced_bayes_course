@@ -12,6 +12,7 @@
 #' @param mu Mean of the Normal distribution used to draw the clusters.
 #' @param sigma_0 Standard deviation of the Normal distribution used
 #' to draw the points around the cluster centre.
+#' @param sigma Standard deviation for cluster centers
 #' @return Returns the n observations sampled from the DPMM distribution.
 #' @examples
 #' rDPM(n=30, alpha=3, mu=0, sigma_0=1.5, sigma=0.7)

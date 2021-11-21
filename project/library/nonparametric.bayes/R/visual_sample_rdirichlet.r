@@ -3,7 +3,7 @@
 #' put more or less mass in the first clusters compared to
 #' higher clusters (rhos).
 #'
-#' @param alpha Parameter that will be passed in to a Gamma distribution
+#' @param a Parameter that will be passed in to a Gamma distribution
 #' in order to draw from the Dirichlet distribution.
 #' @param K Number of clusters to draw
 #' @return NULL
@@ -36,7 +36,7 @@ generate_dirichlet_clusters <- function(a, K) {
 #' a new point. Typing "x" will stop the clustering and the function
 #' will return. 
 #' @param n Number of points to be drawn in the clusters
-#' @param alpha Parameter that will be passed in to a Gamma distribution
+#' @param a Parameter that will be passed in to a Gamma distribution
 #' in order to draw from the Dirichlet distribution.
 #' @param K Number of clusters to draw
 #' @return NULL

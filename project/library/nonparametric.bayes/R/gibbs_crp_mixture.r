@@ -1,5 +1,9 @@
+#' @importFrom mvtnorm dmvnorm
+NULL
+
 library(mvtnorm)
 library(progress)
+
 #' Gibbs sampling for the Chinese Restaurant Process
 #' Implementation details can be found in the associated paper
 #' The algorithm stops at every 1000th iteration and prints
@@ -12,8 +16,8 @@ library(progress)
 #' @param sigma0 Covariance matrix for the points. Default initialisation
 #' is set to matrix(c(1, 0, 0, 1), mrow=2, byrow=TRUE)
 #' @return Returns the cluster assignments after the last iteration.
-#' @examples
-#' cluster_datapoints(split_data$x, sigma0=diag(3^2, 2))
+#' Examples
+#' cluster_datapoints(generate_split_data(350, 0.5)$x, sigma0=diag(3^2, 2))
 #' cluster_datapoints(petal, sigma0=petal_sigma0)
 #' cluster_datapoints(width, sigma0=width_sigma0)
 #' cluster_datapoints(mixed, sigma0=mixed_sigma0)
